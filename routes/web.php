@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Post;
-use Illuminate\Support\Arr;
 
 Route::get('/', function () {
     return view('home', ['title' => 'Home page']);
@@ -31,30 +30,21 @@ Route::get('/detailhewan', function () {
     return view('detailhewan', ['title' => 'DetailHewan']);
 });
 
+// Route untuk halaman daftar blog (Mengambil semua data asli dari database)
 Route::get('/blog', function () {
     return view('blog', [
         'title' => 'Blog',
-        'posts' => Post::all() // Mengubah 'blog' menjadi 'posts' agar sesuai dengan @foreach ($posts as $post)
+        'posts' => Post::all() // Eloquent otomatis mengambil semua baris dari tabel posts
     ]);
 });
 
-// 2. Perbaikan: Membungkus logika Single Post ke dalam Route dengan Parameter {slug}
+// Route untuk halaman detail post (Mencari otomatis berdasarkan slug di database)
 Route::get('/blog/{slug}', function ($slug) {
-    // Mengambil semua data dari model Post
-    $allPosts = Post::all();
-
-    // Mencari 1 post spesifik berdasarkan slug yang ada di URL
-    $post = Arr::first($allPosts, function ($post) use ($slug) {
-        return $post['slug'] == $slug;
-    });
-
-    // Jika post tidak ditemukan, jalankan fungsi abort (404) agar tidak error blank
-    if (!$post) {
-        abort(404);
-    }
+    // Mencari artikel berdasarkan slug, jika tidak ada langsung otomatis menampilkan halaman error 404
+    $post = Post::where('slug', $slug)->firstOrFail(); 
 
     return view('post', [
-        'title' => 'Single Post',
-        'post' => $post
+        'title' => $post->title,
+        'post'  => $post
     ]);
 });
