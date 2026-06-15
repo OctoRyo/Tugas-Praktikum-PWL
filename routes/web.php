@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Post;
+use App\Models\Profile;
 
 Route::get('/', function () {
     return view('home', ['title' => 'Home page']);
@@ -9,12 +10,12 @@ Route::get('/', function () {
 
 Route::get('/about', function () {
     return view('about', [
-        'nama' => "Oktorio Mahmud Ozy Saputra", 
-        'kelas' => "1TRPLB", 
-        'NIM' => "1062551", 
-        'alamat' => "jln.jendral sudirman", 
-        'hobi' => "Berenang", 
-        'title' => 'Halaman About'
+        'nama'   => "Oktorio Mahmud Ozy Saputra",
+        'kelas'  => "1TRPLB",
+        'NIM'    => "1062551",
+        'alamat' => "jln.jendral sudirman",
+        'hobi'   => "Berenang",
+        'title'  => 'Halaman About'
     ]);
 });
 
@@ -23,28 +24,43 @@ Route::get('/halamanbebas', function () {
 });
 
 Route::get('/halamanhome', function () {
-    return view('halamanhome', );
+    return view('halamanhome');
 });
 
 Route::get('/detailhewan', function () {
     return view('detailhewan', ['title' => 'DetailHewan']);
 });
 
-// Route untuk halaman daftar blog (Mengambil semua data asli dari database)
 Route::get('/blog', function () {
+    $category = request('category');
+
+    if ($category) {
+        $posts = Post::where('category', $category)->latest('published_at')->get();
+    } else {
+        $posts = Post::latest('published_at')->get();
+    }
+
     return view('blog', [
-        'title' => 'Blog',
-        'posts' => Post::all() // Eloquent otomatis mengambil semua baris dari tabel posts
+        'title'    => 'Blog',
+        'posts'    => $posts,
+        'category' => $category,
     ]);
 });
 
-// Route untuk halaman detail post (Mencari otomatis berdasarkan slug di database)
 Route::get('/blog/{slug}', function ($slug) {
-    // Mencari artikel berdasarkan slug, jika tidak ada langsung otomatis menampilkan halaman error 404
-    $post = Post::where('slug', $slug)->firstOrFail(); 
+    $post = Post::where('slug', $slug)->firstOrFail();
 
     return view('post', [
         'title' => $post->title,
-        'post'  => $post
+        'post'  => $post,
+    ]);
+});
+
+Route::get('/profile', function () {
+    $profile = Profile::first();
+
+    return view('profile', [
+        'title'   => 'Profile',
+        'profile' => $profile,
     ]);
 });
